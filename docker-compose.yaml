@@ -1,0 +1,24 @@
+master:
+  image: redis:3.2.5-alpine
+  volumes:
+    - "./master_data:/data"
+  ports:
+    - "6379:6379"
+slave:
+  image: redis:3.2.5-alpine
+  command: redis-server --slaveof redis-master 6379
+  volumes:
+    - "./slave_data:/data"
+  links:
+    - master:redis-master
+sentinel1:
+  build: sentinel
+  environment:
+    - SENTINEL_DOWN_AFTER=5000
+    - SENTINEL_FAILOVER=5000
+    - SENTINEL_PORT=26379
+  links:
+    - master:redis-master
+    - slave
+  ports:
+    - "26379:26379"
